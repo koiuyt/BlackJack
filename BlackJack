@@ -1,0 +1,160 @@
+import random
+
+class Card:
+    def __init__(self, suit, value):
+        self.suit = suit
+        self.value = value
+
+    def show(self):
+        print(str(self.value) + " Of " +self.suit)
+
+class Deck:
+    def __init__(self):
+        self.deck = []
+        self.create()
+        self.shuffle()
+
+    def create(self):
+        for suit in("Spades", "Clubs", "Diamonds", "Hearts"):
+            for value in range(1,14):
+                self.deck.append(Card(suit,value))
+
+    def shuffle(self):
+        return random.shuffle(self.deck)
+
+    def deal(self):
+        try:
+            return self.deck.pop()
+        except IndexError:
+            print("The deck is now dealt, try to win!")
+
+    def show(self):
+        for c in self.deck:
+            c.show()
+
+class Player:
+    def __init__(self, name):
+        self.name = name
+        self.hand = []
+
+    def show(self):
+        for c in self.hand:
+            c.show()
+
+buy_in = int(input("How much would you like to play for today?"))
+
+while True:
+
+    deck = Deck()
+
+    player_names = ['Dealer']
+
+    for p in range(0, 1):
+        player_names.append(input('Please enter your name!'))
+
+    players = [Player(name) for name in player_names]
+
+    bet = 0
+
+    while bet > buy_in or bet <=0:
+        try:
+            bet = int(input("How much would you like to wager?"))
+        except ValueError:
+            print("That's not a valid bet, please try again!")
+
+    for p in players:
+        for i in range(0, 2):
+            p.hand.append(deck.deal())
+
+    dealer = players[0]
+    player1 = players[1]
+
+    #player1.show()
+    #player2.show()
+
+    switch = ''
+
+    split = []
+
+    while not switch:
+
+        #Player's Turn
+        while True:
+            dealer.hand[1].show()
+            player1.show()
+
+            try:
+                action = input("Would you like to do? Hit, Stand, Double, or Split?")
+                if player1.hand[0].value != player1.hand[1].value and action == 'Split':
+                    raise ValueError
+                elif action.title() not in ['Hit', 'Stand', 'Double', 'Split']:
+                    raise ValueError
+                elif action.title() == 'Stand':
+                    break
+                elif action.title() == 'Double':
+                    player1.hand.append(deck.deal())
+                    bet *= 2
+                    break
+                elif action.title() == 'Split':
+                    split.append(player1[1].pop)
+                    bet *= 2
+                elif action.title() == 'Hit':
+                    player1.hand.append(deck.deal())
+            except ValueError:
+                print("Your choice was invalid, please enter again!")
+
+        #Dealer's turn
+        while True:
+            dealer.show()
+            player1.show()
+            if sum(dealer.hand.values) < 17:
+                dealer.hand.append(deck.deal())
+            else:
+                break
+
+        player1.hand.values = [10 if x >= 10 else x for x in player1.hand.values]
+        dealer.hand.values = [10 if x >= 10 else x for x in dealer.hand.values]
+
+        if 1 in player1.hand.values:
+            if sum([11 if x == 1 else x for x in player1.hand.values]) > 21:
+                player_hand = sum(player1.hand.value)
+            else:
+                player_hand = sum([11 if x == 1 else x for x in player1.hand.values])
+
+        if 1 in dealer.hand.values:
+            if sum([11 if x == 1 else x for x in dealer.hand.values]) > 21:
+                dealer_hand = sum(player1.hand.value)
+            else:
+                dealer_hand = sum([11 if x == 1 else x for x in dealer.hand.values])
+
+        if player_hand > 21:
+            print("Sorry you busted! Try again, my friend!")
+            buy_in -= bet
+        elif dealer_hand > 21:
+            print("The dealer busted, that sucker!")
+            buy_in += bet
+        elif player_hand == 21 and dealer_hand != 21:
+            print("Winner winner chicken dinner, blackjack pays 1.5!")
+            buy_in += 1.5 * bet
+        elif player_hand > dealer_hand:
+            print("You win!")
+            buy_in += bet
+        else:
+            print("Sorry, tough luck buddy.")
+            buy_in -= bet
+
+    replay = input("Would you like to play again? Press Y for Yes and N for No.")
+    if replay == 'N':
+        break
+    else:
+        pass
+
+    #deck = Deck()
+   # for p in players:
+
+
+   #     deck.deal()
+
+    #for p in players:
+    #    print(p)
+    #break
